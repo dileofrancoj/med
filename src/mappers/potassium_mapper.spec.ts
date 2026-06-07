@@ -110,7 +110,7 @@ describe('PotassiumMapper Unit Tests', () => {
       expect(dto.classification).toEqual({
         status: 'hipokalemia',
         severity: 'moderada',
-        value: 2.7,
+        kLevel: 2.7,
       });
       expect(dto.mEqRequired).toBe(5);
       expect(dto.mlClK).toBe(1.67);
