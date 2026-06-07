@@ -15,6 +15,7 @@ export interface RapidPotassiumCorrectionRequest {
   doseMEqKg: 0.5 | 1.0;
   infusionTimeHours: 2 | 3;
   customDilutionFluidVolumeMl?: number; // Optional custom volume to validate
+  selectedConcentrationMEqL: number;
 }
 
 export interface RapidPotassiumCorrectionResponse {

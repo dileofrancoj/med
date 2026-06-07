@@ -53,11 +53,19 @@ export async function calculateRapidCorrection(
 
   // 4. Volumen de Dilución & Concentración
   const access = patient.venousAccess || 'peripheral';
-  const limitConcentration =
+  const maxAllowedConcentrationMEqMl =
     access === 'peripheral'
       ? constants.maxPotassiumConcentrationPeripheralMEqMl
       : constants.maxPotassiumConcentrationCentralMEqMl;
 
+  const selectedConcentrationMEqMl = config.selectedConcentrationMEqL / 1000;
+  if (selectedConcentrationMEqMl > maxAllowedConcentrationMEqMl) {
+    alerts.push({
+      type: 'danger',
+      parameter: 'flujo',
+      message: `La concentración seleccionada (${selectedConcentrationMEqMl * 1000} mEq/L) supera el máximo permitido para ${access} (${maxAllowedConcentrationMEqMl * 1000} mEq/L).`,
+    });
+  }
   let dilutionFluidVolumeMl: number;
   let isCustom = false;
 
@@ -66,7 +74,7 @@ export async function calculateRapidCorrection(
     isCustom = true;
   } else {
     // Calcular volumen mínimo seguro
-    const minTotalVolume = mEqRequired / limitConcentration;
+    const minTotalVolume = mEqRequired / selectedConcentrationMEqMl;
     const calculatedDilution = Math.ceil(minTotalVolume - mlClK);
     dilutionFluidVolumeMl = calculatedDilution < 10 ? 10 : calculatedDilution;
   }
@@ -80,7 +88,7 @@ export async function calculateRapidCorrection(
     formula: 'Volumen Total Mínimo (ml) = mEq Requeridos / Límite de Concentración (mEq/ml)',
     development: isCustom
       ? `Usando volumen personalizado del usuario: ${dilutionFluidVolumeMl} ml de dilución`
-      : `mEq Requeridos: ${mEqRequired} mEq / Límite (${limitConcentration} mEq/ml) - ml ClK (${mlClK} ml)`,
+      : `mEq Requeridos: ${mEqRequired} mEq / Límite (${selectedConcentrationMEqMl} mEq/ml) - ml ClK (${mlClK} ml)`,
     result: `${dilutionFluidVolumeMl} ml de solución compatible`,
   });
 
@@ -157,8 +165,8 @@ export async function calculateRapidCorrection(
     totalVolumeMl,
     infusionRateMlPerHour,
     flowMEqKgH,
-    steps,
     alerts,
+    steps,
     medicalOrder,
   };
 }

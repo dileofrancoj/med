@@ -50,6 +50,7 @@ describe('Potassium Service Pure Functions Unit Tests', () => {
         patient,
         doseMEqKg: 0.5,
         infusionTimeHours: 2,
+        selectedConcentrationMEqL: 40,
       });
 
       expect(res.mEqRequired).toBe(5); // 10kg * 0.5 mEq/kg = 5 mEq
@@ -64,6 +65,7 @@ describe('Potassium Service Pure Functions Unit Tests', () => {
         patient,
         doseMEqKg: 1.0,
         infusionTimeHours: 2,
+        selectedConcentrationMEqL: 40,
       });
       expect(res.flowMEqKgH).toBe(0.5);
       expect(res.alerts).toHaveLength(0);
@@ -75,6 +77,7 @@ describe('Potassium Service Pure Functions Unit Tests', () => {
         doseMEqKg: 1.0,
         infusionTimeHours: 2,
         customDilutionFluidVolumeMl: 10, // Too small! Concentration will be very high
+        selectedConcentrationMEqL: 40,
       });
 
       expect(res.alerts).toContainEqual(
@@ -92,6 +95,7 @@ describe('Potassium Service Pure Functions Unit Tests', () => {
         doseMEqKg: 1.0,
         infusionTimeHours: 2,
         customDilutionFluidVolumeMl: 150, // Extremely safe volume
+        selectedConcentrationMEqL: 40,
       });
 
       const hasPeripheralAlert = res.alerts.some((a) => a.parameter === 'concentracion_periferica');

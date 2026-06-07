@@ -5,90 +5,87 @@ import {
 } from '../utils/validate_potassium';
 import * as potassiumService from '../services/potassium_service';
 import * as potassiumUtils from '../utils/validate_potassium';
+import { PotassiumMapper } from '../mappers/potassium_mapper';
 
-export const classifyPotassium = async (req: Request, res: Response): Promise<void> => {
+export const classifyPotassium = async (req: Request, res: Response): Promise<Response | void> => {
   try {
     const kLevelStr = req.query.kLevel as string;
     if (!kLevelStr) {
-      res.status(400).json({ error: 'Falta parámetro kLevel' });
-      return;
+      return res.status(400).json({ error: 'Falta parámetro kLevel' });
     }
 
     const kLevel = parseFloat(kLevelStr);
     if (isNaN(kLevel)) {
-      res.status(400).json({ error: 'kLevel debe ser un número válido' });
-      return;
+      return res.status(400).json({ error: 'kLevel debe ser un número válido' });
     }
 
     const classification = potassiumUtils.classifyPotassium(kLevel);
     res.status(200).json(classification);
   } catch (error: unknown) {
     const msg = error instanceof Error ? error.message : 'Error interno del servidor';
-    res.status(500).json({ error: msg });
+    return res.status(500).json({ error: msg });
   }
 };
 
-export const calculateRapidCorrection = async (req: Request, res: Response): Promise<void> => {
+export const calculateRapidCorrection = async (req: Request, res: Response): Promise<Response> => {
   try {
-    const { patient, doseMEqKg, infusionTimeHours, customDilutionFluidVolumeMl } = req.body;
+    const { patient } = req.body;
 
     if (!patient || !patient.weight) {
-      res
+      return res
         .status(400)
-        .json({ error: 'Los datos del paciente con su peso (weight) son obligatorios' });
-      return;
+        .json({ error: 'Los datos del paciente con su peso (weight o weightKg) son obligatorios' });
     }
 
-    if (isInvalidPotassiumDose(doseMEqKg)) {
-      res.status(400).json({ error: 'La dosis de corrección rápida debe ser 0.5 o 1.0 mEq/kg' });
-      return;
+    const domainRequest = PotassiumMapper.toRapidCorrection(req.body);
+    if(domainRequest.patient.venousAccess !== 'central' && domainRequest.patient.venousAccess !== 'peripheral') {
+      return res.status(400).json({ error: 'El tipo de acceso debe ser central o periferico.' });
     }
-    console.log('infusionTimeHours', infusionTimeHours);
-    if (isInvalidPotassiumInfusionTimeHours(infusionTimeHours)) {
-      res.status(400).json({ error: 'El tiempo de infusión debe ser 2 o 3 horas' });
-      return;
+    if(domainRequest.selectedConcentrationMEqL == 0 || isNaN(domainRequest.selectedConcentrationMEqL)) {
+      return res.status(400).json({ error: 'La dosis de corrección rápida debe ser 0.5 o 1.0 mEq/kg' });
+    }
+    
+    if (isInvalidPotassiumDose(domainRequest.doseMEqKg)) {
+      return res.status(400).json({ error: 'La dosis de corrección rápida debe ser 0.5 o 1.0 mEq/kg' });
+
     }
 
-    const result = await potassiumService.calculateRapidCorrection({
-      patient,
-      doseMEqKg,
-      infusionTimeHours,
-      customDilutionFluidVolumeMl,
-    });
+    if (isInvalidPotassiumInfusionTimeHours(domainRequest.infusionTimeHours)) {
+      return res.status(400).json({ error: 'El tiempo de infusión debe ser 2 o 3 horas' });
+    }
+    const response = await potassiumService.calculateRapidCorrection(domainRequest);
+    const responseDto = PotassiumMapper.toRapidCorrectionResponseDto(response);
 
-    res.status(200).json(result);
+    return res.status(200).json(responseDto);
   } catch (error: unknown) {
     const msg = error instanceof Error ? error.message : 'Error interno del servidor';
-    res.status(500).json({ error: msg });
+    return res.status(500).json({ error: msg });
   }
 };
 
-export const calculateMaintenance = async (req: Request, res: Response): Promise<void> => {
+export const calculateMaintenance = async (req: Request, res: Response): Promise<Response | void> => {
   try {
     const { patient, dailyRequirementMEqKg } = req.body;
 
-    if (!patient || !patient.weight) {
-      res
+    if (!patient || (!patient.weight && !patient.weightKg)) {
+      return res
         .status(400)
-        .json({ error: 'Los datos del paciente con su peso (weight) son obligatorios' });
-      return;
+        .json({ error: 'Los datos del paciente con su peso (weight o weightKg) son obligatorios' });
     }
 
-    if (dailyRequirementMEqKg === undefined || typeof dailyRequirementMEqKg !== 'number') {
-      res
+    if (dailyRequirementMEqKg === undefined || isNaN(parseFloat(dailyRequirementMEqKg))) {
+      return res
         .status(400)
         .json({
           error: 'El requerimiento diario (dailyRequirementMEqKg) debe ser un número válido',
         });
-      return;
     }
 
-    const result = await potassiumService.calculateMaintenance({
-      patient,
-      dailyRequirementMEqKg,
-    });
+    const domainRequest = PotassiumMapper.toMaintenanceDomain(req.body);
+    const result = await potassiumService.calculateMaintenance(domainRequest);
+    const responseDto = PotassiumMapper.toMaintenanceResponseDto(result);
 
-    res.status(200).json(result);
+    res.status(200).json(responseDto);
   } catch (error: unknown) {
     const msg = error instanceof Error ? error.message : 'Error interno del servidor';
     res.status(500).json({ error: msg });
