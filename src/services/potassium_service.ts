@@ -159,6 +159,7 @@ export async function calculateRapidCorrection(
 
   return {
     patient,
+    classification: config.classification,
     mEqRequired,
     mlClK,
     dilutionFluidVolumeMl,

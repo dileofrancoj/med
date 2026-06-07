@@ -1,3 +1,5 @@
+import { PotassiumClassification } from "../../models/potassium";
+
 export interface RapidCorrectionRequestDto {
   patient: {
     weight: number;
@@ -9,14 +11,11 @@ export interface RapidCorrectionRequestDto {
   infusionTimeHours: string | number;
   customDilutionFluidVolumeMl?: string | number;
   selectedConcentrationMEqL?: string | number;
+  classification?: PotassiumClassification
 }
 
 export interface RapidCorrectionResponseDto {
-  classification?: {
-    status: string;
-    severity: string;
-    value: number;
-  };
+  classification?: PotassiumClassification
   mEqRequired: number;
   mlClK: number;
   dilutionFluidVolumeMl: number;
@@ -29,8 +28,7 @@ export interface RapidCorrectionResponseDto {
 // Interfaces for Maintenance DTOs
 export interface PotassiumMaintenanceRequestDto {
   patient: {
-    weight: string | number;
-    weightKg?: string | number;
+    weight: number;
     age?: string | number;
     sex?: 'male' | 'female';
   };

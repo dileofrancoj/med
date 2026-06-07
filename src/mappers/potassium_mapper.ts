@@ -17,7 +17,7 @@ export const PotassiumMapper = {
     const rawPatient = dto.patient;
 
     const patient: Patient = {
-      weight: dto.patient.weight,
+      weight: rawPatient.weight,
       age: dto.patient.age ?? undefined,
       sex: rawPatient.sex,
       venousAccess: rawPatient.accessType,
@@ -28,7 +28,14 @@ export const PotassiumMapper = {
       doseMEqKg: potassiumHelper.parseDoseMEqKg(dto.doseMEqKg),
       infusionTimeHours: potassiumHelper.parseInfusionTimeHours(dto.infusionTimeHours),
       customDilutionFluidVolumeMl: potassiumHelper.parseOptionalNumber(dto.customDilutionFluidVolumeMl),
-      selectedConcentrationMEqL: potassiumHelper.parseSelectedConcentrationMEqL(dto.selectedConcentrationMEqL)
+      selectedConcentrationMEqL: potassiumHelper.parseSelectedConcentrationMEqL(dto.selectedConcentrationMEqL),
+      classification: dto.classification
+        ? {
+            status: dto.classification.status,
+            severity: dto.classification.severity as any,
+            kLevel: dto.classification.kLevel,
+          }
+        : undefined,
     };
   },
 
@@ -39,6 +46,13 @@ export const PotassiumMapper = {
     domain: RapidPotassiumCorrectionResponse,
   ): RapidCorrectionResponseDto {
     return {
+      classification: domain.classification
+        ? {
+            status: domain.classification.status,
+            severity: domain.classification.severity,
+            kLevel: domain.classification.kLevel,
+          }
+        : undefined,
       mEqRequired: domain.mEqRequired,
       mlClK: domain.mlClK,
       dilutionFluidVolumeMl: domain.dilutionFluidVolumeMl,
@@ -54,11 +68,9 @@ export const PotassiumMapper = {
    */
   toMaintenanceDomain(dto: PotassiumMaintenanceRequestDto): PotassiumMaintenanceRequest {
     const rawPatient = dto.patient;
-    const rawWeight = rawPatient.weight !== undefined ? rawPatient.weight : rawPatient.weightKg;
-    const weight = typeof rawWeight === 'string' ? parseFloat(rawWeight) : (rawWeight ?? 0);
 
     const patient: Patient = {
-      weight,
+      weight: rawPatient.weight,
       age: rawPatient.age
         ? typeof rawPatient.age === 'string'
           ? parseInt(rawPatient.age, 10)
