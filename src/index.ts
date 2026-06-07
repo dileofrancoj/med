@@ -11,7 +11,7 @@ app.use(express.json());
 app.use('/api', potassiumRoutes);
 app.use('/api', sodiumRoutes);
 
-app.get('/health', (req, res) => {
+app.get('/health', (_, res) => {
   res.json({ status: 'UP', env: config.env });
 });
 
