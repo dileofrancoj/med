@@ -1,7 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import {
-  PotassiumMapper,
-} from './potassium_mapper';
+import { PotassiumMapper } from './potassium_mapper';
 import {
   RapidPotassiumCorrectionResponse,
   PotassiumMaintenanceResponse,
@@ -59,7 +57,7 @@ describe('PotassiumMapper Unit Tests', () => {
           weight: 10,
           age: 6,
           sex: 'female',
-          accessType: 'peripheral'
+          accessType: 'peripheral',
         },
         doseMEqKg: '0.5',
         infusionTimeHours: '2',

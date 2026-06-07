@@ -1,4 +1,4 @@
-import { PotassiumClassification } from "../../models/potassium";
+import { PotassiumClassification } from '../../models/potassium';
 
 export interface RapidCorrectionRequestDto {
   patient: {
@@ -11,11 +11,11 @@ export interface RapidCorrectionRequestDto {
   infusionTimeHours: string | number;
   customDilutionFluidVolumeMl?: string | number;
   selectedConcentrationMEqL?: string | number;
-  classification?: PotassiumClassification
+  classification?: PotassiumClassification;
 }
 
 export interface RapidCorrectionResponseDto {
-  classification?: PotassiumClassification
+  classification?: PotassiumClassification;
   mEqRequired: number;
   mlClK: number;
   dilutionFluidVolumeMl: number;

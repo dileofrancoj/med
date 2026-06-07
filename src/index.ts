@@ -15,8 +15,12 @@ app.get('/health', (req, res) => {
   res.json({ status: 'UP', env: config.env });
 });
 
-const server = app.listen(config.port, () => {
-  console.log(`Server running in ${config.env} mode on port ${config.port}`);
-});
+let server;
+if (!process.env.VERCEL) {
+  server = app.listen(config.port, () => {
+    console.log(`Server running in ${config.env} mode on port ${config.port}`);
+  });
+}
 
 export { app, server };
+export default app;

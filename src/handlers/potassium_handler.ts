@@ -38,16 +38,25 @@ export const calculateRapidCorrection = async (req: Request, res: Response): Pro
     }
 
     const domainRequest = PotassiumMapper.toRapidCorrection(req.body);
-    if(domainRequest.patient.venousAccess !== 'central' && domainRequest.patient.venousAccess !== 'peripheral') {
+    if (
+      domainRequest.patient.venousAccess !== 'central' &&
+      domainRequest.patient.venousAccess !== 'peripheral'
+    ) {
       return res.status(400).json({ error: 'El tipo de acceso debe ser central o periferico.' });
     }
-    if(domainRequest.selectedConcentrationMEqL == 0 || isNaN(domainRequest.selectedConcentrationMEqL)) {
-      return res.status(400).json({ error: 'La dosis de corrección rápida debe ser 0.5 o 1.0 mEq/kg' });
+    if (
+      domainRequest.selectedConcentrationMEqL == 0 ||
+      isNaN(domainRequest.selectedConcentrationMEqL)
+    ) {
+      return res
+        .status(400)
+        .json({ error: 'La dosis de corrección rápida debe ser 0.5 o 1.0 mEq/kg' });
     }
-    
-    if (isInvalidPotassiumDose(domainRequest.doseMEqKg)) {
-      return res.status(400).json({ error: 'La dosis de corrección rápida debe ser 0.5 o 1.0 mEq/kg' });
 
+    if (isInvalidPotassiumDose(domainRequest.doseMEqKg)) {
+      return res
+        .status(400)
+        .json({ error: 'La dosis de corrección rápida debe ser 0.5 o 1.0 mEq/kg' });
     }
 
     if (isInvalidPotassiumInfusionTimeHours(domainRequest.infusionTimeHours)) {
@@ -63,7 +72,10 @@ export const calculateRapidCorrection = async (req: Request, res: Response): Pro
   }
 };
 
-export const calculateMaintenance = async (req: Request, res: Response): Promise<Response | void> => {
+export const calculateMaintenance = async (
+  req: Request,
+  res: Response,
+): Promise<Response | void> => {
   try {
     const { patient, dailyRequirementMEqKg } = req.body;
 
@@ -74,11 +86,9 @@ export const calculateMaintenance = async (req: Request, res: Response): Promise
     }
 
     if (dailyRequirementMEqKg === undefined || isNaN(parseFloat(dailyRequirementMEqKg))) {
-      return res
-        .status(400)
-        .json({
-          error: 'El requerimiento diario (dailyRequirementMEqKg) debe ser un número válido',
-        });
+      return res.status(400).json({
+        error: 'El requerimiento diario (dailyRequirementMEqKg) debe ser un número válido',
+      });
     }
 
     const domainRequest = PotassiumMapper.toMaintenanceDomain(req.body);

@@ -6,8 +6,13 @@ import {
   PotassiumMaintenanceResponse,
 } from '../models/potassium';
 
-import * as potassiumHelper from './helpers/potassium_mapper'
-import { RapidCorrectionRequestDto, RapidCorrectionResponseDto, PotassiumMaintenanceRequestDto, PotassiumMaintenanceResponseDto} from './models/Potassium';
+import * as potassiumHelper from './helpers/potassium_mapper';
+import {
+  RapidCorrectionRequestDto,
+  RapidCorrectionResponseDto,
+  PotassiumMaintenanceRequestDto,
+  PotassiumMaintenanceResponseDto,
+} from './models/Potassium';
 
 // Interfaces for Rapid Correction DTOs
 
@@ -27,8 +32,12 @@ export const PotassiumMapper = {
       patient,
       doseMEqKg: potassiumHelper.parseDoseMEqKg(dto.doseMEqKg),
       infusionTimeHours: potassiumHelper.parseInfusionTimeHours(dto.infusionTimeHours),
-      customDilutionFluidVolumeMl: potassiumHelper.parseOptionalNumber(dto.customDilutionFluidVolumeMl),
-      selectedConcentrationMEqL: potassiumHelper.parseSelectedConcentrationMEqL(dto.selectedConcentrationMEqL),
+      customDilutionFluidVolumeMl: potassiumHelper.parseOptionalNumber(
+        dto.customDilutionFluidVolumeMl,
+      ),
+      selectedConcentrationMEqL: potassiumHelper.parseSelectedConcentrationMEqL(
+        dto.selectedConcentrationMEqL,
+      ),
       classification: dto.classification
         ? {
             status: dto.classification.status,

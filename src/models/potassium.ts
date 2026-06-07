@@ -16,7 +16,7 @@ export interface RapidPotassiumCorrectionRequest {
   infusionTimeHours: 2 | 3;
   customDilutionFluidVolumeMl?: number; // Optional custom volume to validate
   selectedConcentrationMEqL: number;
-  classification?: PotassiumClassification
+  classification?: PotassiumClassification;
 }
 
 export interface RapidPotassiumCorrectionResponse {
