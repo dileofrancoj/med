@@ -1,10 +1,10 @@
 export type VenousAccess = 'peripheral' | 'central';
-export type Sex = 'male' | 'female';
+export type SEX = 'male' | 'female';
 
 export interface Patient {
   weight: number;
   age?: number;
-  sex?: Sex;
+  sex?: SEX;
   diagnosis?: string;
   venousAccess?: VenousAccess;
 }

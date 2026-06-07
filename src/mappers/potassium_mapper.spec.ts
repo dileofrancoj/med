@@ -35,22 +35,6 @@ describe('PotassiumMapper Unit Tests', () => {
       expect(domain.selectedConcentrationMEqL).toBe(100);
     });
 
-    it('should fall back and map weightKg when weight is not provided', () => {
-      const dto = {
-        patient: {
-          weight: 15.4,
-        },
-        doseMEqKg: '1.0',
-        infusionTimeHours: '3',
-      } as unknown as RapidCorrectionRequestDto;
-
-      const domain = PotassiumMapper.toRapidCorrection(dto);
-
-      expect(domain.patient.weight).toBe(15.4);
-      expect(domain.doseMEqKg).toBe(1.0);
-      expect(domain.infusionTimeHours).toBe(3);
-    });
-
     it('should parse string representations of numbers to appropriate types', () => {
       const dto: RapidCorrectionRequestDto = {
         patient: {
@@ -125,7 +109,7 @@ describe('PotassiumMapper Unit Tests', () => {
       const dto: PotassiumMaintenanceRequestDto = {
         patient: {
           weight: 12,
-          age: '3',
+          age: 3,
         },
         dailyRequirementMEqKg: '3.5',
       };

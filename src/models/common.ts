@@ -18,4 +18,5 @@ export interface MedicalOrder {
   infusionRateMlPerHour: number;
   durationHours: number;
   instructionText: string;
+  alerts?: ValidationAlert[];
 }

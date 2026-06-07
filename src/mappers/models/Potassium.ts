@@ -1,10 +1,12 @@
+import { ValidationAlert } from '../../models/common';
+import { SEX } from '../../models/patient';
 import { PotassiumClassification } from '../../models/potassium';
 
 export interface RapidCorrectionRequestDto {
   patient: {
     weight: number;
     age?: number;
-    sex?: 'male' | 'female';
+    sex?: SEX;
     accessType: 'peripheral' | 'central';
   };
   doseMEqKg: string | number;
@@ -23,14 +25,15 @@ export interface RapidCorrectionResponseDto {
   infusionRateMlPerHour: number;
   flowMEqKgH: number;
   instructionText: string;
+  alerts?: ValidationAlert[];
 }
 
 // Interfaces for Maintenance DTOs
 export interface PotassiumMaintenanceRequestDto {
   patient: {
     weight: number;
-    age?: string | number;
-    sex?: 'male' | 'female';
+    age?: number;
+    sex?: SEX;
   };
   dailyRequirementMEqKg: string | number;
 }

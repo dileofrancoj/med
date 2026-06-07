@@ -41,7 +41,7 @@ export const PotassiumMapper = {
       classification: dto.classification
         ? {
             status: dto.classification.status,
-            severity: dto.classification.severity as any,
+            severity: dto.classification.severity,
             kLevel: dto.classification.kLevel,
           }
         : undefined,
@@ -54,21 +54,33 @@ export const PotassiumMapper = {
   toRapidCorrectionResponseDto(
     domain: RapidPotassiumCorrectionResponse,
   ): RapidCorrectionResponseDto {
+    const {
+      alerts,
+      classification,
+      mEqRequired,
+      mlClK,
+      dilutionFluidVolumeMl,
+      totalVolumeMl,
+      infusionRateMlPerHour,
+      flowMEqKgH,
+      medicalOrder,
+    } = domain;
     return {
-      classification: domain.classification
+      classification: classification
         ? {
-            status: domain.classification.status,
-            severity: domain.classification.severity,
-            kLevel: domain.classification.kLevel,
+            status: classification.status,
+            severity: classification.severity,
+            kLevel: classification.kLevel,
           }
         : undefined,
-      mEqRequired: domain.mEqRequired,
-      mlClK: domain.mlClK,
-      dilutionFluidVolumeMl: domain.dilutionFluidVolumeMl,
-      totalVolumeMl: domain.totalVolumeMl,
-      infusionRateMlPerHour: domain.infusionRateMlPerHour,
-      flowMEqKgH: domain.flowMEqKgH,
-      instructionText: domain.medicalOrder.instructionText,
+      mEqRequired,
+      mlClK,
+      dilutionFluidVolumeMl,
+      totalVolumeMl,
+      infusionRateMlPerHour,
+      flowMEqKgH,
+      instructionText: medicalOrder.instructionText,
+      alerts,
     };
   },
 
