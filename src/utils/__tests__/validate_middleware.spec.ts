@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { validate } from './validate_middleware';
+import { validate } from '../validate_middleware';
 import { z } from 'zod';
 import { Request, Response } from 'express';
 

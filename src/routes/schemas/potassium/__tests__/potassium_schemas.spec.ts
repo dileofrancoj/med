@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { rapidCorrectionSchema, maintenanceSchema } from './potassium_schemas';
+import { rapidCorrectionSchema, maintenanceSchema } from '../potassium_schemas';
 
 describe('Potassium Schemas', () => {
   describe('rapidCorrectionSchema', () => {

@@ -13,13 +13,12 @@ export const validate = (schema: ZodObject) => {
       // @ts-expect-error ignore query
       req.query = parsed.query;
 
-      return next();
+      next();
     } catch (error) {
     if (error instanceof ZodError) {
       return res.status(400).json({
         status: 'error',
         message: 'Error de validación en la petición',
-        // Change error.errors to error.issues 🌟
         errors: error.issues.map((err) => ({
           field: err.path.slice(1).join('.'),
           message: err.message,

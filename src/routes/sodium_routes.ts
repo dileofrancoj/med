@@ -5,7 +5,7 @@ import {
   classifySodiumSchema,
   rapidCorrectionSodiumSchema,
   slowCorrectionSodiumSchema,
-} from '../schemas/sodium_schemas';
+} from './schemas/sodium/sodium_schemas';
 
 const router = Router();
 

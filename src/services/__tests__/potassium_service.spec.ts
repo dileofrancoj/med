@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
-import * as potassiumService from './potassium_service';
-import { classifyPotassium } from '../utils/validate_potassium';
-import { Patient } from '../models/patient';
+import * as potassiumService from '../potassium_service';
+import { classifyPotassium } from '../../utils/validate_potassium';
+import { Patient } from '../../models/patient';
 
 describe('Potassium Service Pure Functions Unit Tests', () => {
   describe('Classification of Potassium Levels', () => {

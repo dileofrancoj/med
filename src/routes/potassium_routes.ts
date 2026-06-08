@@ -5,7 +5,7 @@ import {
   classifyPotassiumSchema,
   rapidCorrectionSchema,
   maintenanceSchema,
-} from '../schemas/potassium_schemas';
+} from './schemas/potassium/potassium_schemas';
 
 const router = Router();
 

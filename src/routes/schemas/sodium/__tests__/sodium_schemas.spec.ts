@@ -3,7 +3,7 @@ import {
   classifySodiumSchema,
   rapidCorrectionSodiumSchema,
   slowCorrectionSodiumSchema,
-} from './sodium_schemas';
+} from '../sodium_schemas';
 
 describe('Sodium Schemas', () => {
   describe('classifySodiumSchema', () => {

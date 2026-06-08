@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import * as sodiumService from './sodium_service';
-import { Patient } from '../models/patient';
+import * as sodiumService from '../sodium_service';
+import { Patient } from '../../models/patient';
 
 describe('Sodium Service Pure Functions Unit Tests', () => {
   describe('Classification of Sodium Levels', () => {
