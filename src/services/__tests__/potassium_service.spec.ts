@@ -104,7 +104,7 @@ describe('Potassium Service Pure Functions Unit Tests', () => {
   });
 
   describe('Potassium Maintenance (Aporte)', () => {
-    it('should calculate daily maintenance requirements properly', async () => {
+    it('should calculate daily maintenance requirements properly with default values', async () => {
       const patient: Patient = { weight: 12 };
       const res = await potassiumService.calculateMaintenance({
         patient,
@@ -113,6 +113,47 @@ describe('Potassium Service Pure Functions Unit Tests', () => {
 
       expect(res.mEqRequired).toBe(36); // 12 * 3 = 36 mEq
       expect(res.mlClK).toBe(12); // 36 / 3 = 12 ml
+      expect(res.dilutionFluidVolumeMl).toBeDefined();
+      expect(res.totalVolumeMl).toBe(res.dilutionFluidVolumeMl + res.mlClK);
+      expect(res.infusionRateMlPerHour).toBeCloseTo(res.totalVolumeMl / 24, 2);
+      expect(res.medicalOrder).toBeDefined();
+      expect(res.medicalOrder?.instructionText).toContain('INDICACIÓN MÉDICA PEDIÁTRICA DE MANTENIMIENTO');
+    });
+
+    it('should respect custom infusionTimeHours and selectedConcentrationMEqL', async () => {
+      const patient: Patient = { weight: 10 };
+      const res = await potassiumService.calculateMaintenance({
+        patient,
+        dailyRequirementMEqKg: 2.0, // 20 mEq total
+        infusionTimeHours: 12,
+        selectedConcentrationMEqL: 20, // 20 mEq/L
+      });
+
+      expect(res.mEqRequired).toBe(20);
+      expect(res.mlClK).toBe(6.67); // 20 / 3
+      // selectedConcentrationMEqMl = 20/1000 = 0.02
+      // minTotalVolume = 20 / 0.02 = 1000 ml
+      // calculatedDilution = Math.ceil(1000 - 6.67) = 994
+      expect(res.dilutionFluidVolumeMl).toBe(994);
+      expect(res.totalVolumeMl).toBe(1000.67);
+      expect(res.infusionRateMlPerHour).toBe(83.39); // 1000.67 / 12 = 83.389 -> 83.39
+    });
+
+    it('should trigger alert when maintenance concentration exceeds peripheral venous access limits', async () => {
+      const patient: Patient = { weight: 10, venousAccess: 'peripheral' };
+      const res = await potassiumService.calculateMaintenance({
+        patient,
+        dailyRequirementMEqKg: 2.0,
+        selectedConcentrationMEqL: 70, // 60 mEq/L exceeds peripheral limit (40 mEq/L)
+      });
+      console.log('DEBUG RES:', JSON.stringify(res, null, 2));
+
+      expect(res.alerts).toContainEqual(
+        expect.objectContaining({
+          type: 'danger',
+          parameter: 'concentracion_periferica',
+        }),
+      );
     });
   });
 });

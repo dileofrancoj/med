@@ -178,6 +178,7 @@ export async function calculateMaintenance(
 ): Promise<PotassiumMaintenanceResponse> {
   const { patient, dailyRequirementMEqKg } = request;
   const steps: CalculationStep[] = [];
+  const alerts: ValidationAlert[] = [];
 
   const mEqRequired = parseFloat((patient.weight * dailyRequirementMEqKg).toFixed(2));
   steps.push({
@@ -195,11 +196,126 @@ export async function calculateMaintenance(
     result: `${mlClK} ml`,
   });
 
+  const infusionTimeHours = request.infusionTimeHours ?? 24;
+  const selectedConcentrationMEqL = request.selectedConcentrationMEqL ?? 40;
+  const customDilutionFluidVolumeMl = request.customDilutionFluidVolumeMl;
+
+  // Volumen de Dilución & Concentración
+  const access = patient.venousAccess || 'peripheral';
+  const maxAllowedConcentrationMEqMl =
+    access === 'peripheral'
+      ? constants.maxPotassiumConcentrationPeripheralMEqMl
+      : constants.maxPotassiumConcentrationCentralMEqMl;
+
+  const selectedConcentrationMEqMl = selectedConcentrationMEqL / 1000;
+  if (selectedConcentrationMEqMl > maxAllowedConcentrationMEqMl) {
+    alerts.push({
+      type: 'danger',
+      parameter: 'flujo',
+      message: `La concentración seleccionada (${selectedConcentrationMEqL} mEq/L) supera el máximo permitido para ${access === 'peripheral' ? 'vía periférica' : 'vía central'} (${maxAllowedConcentrationMEqMl * 1000} mEq/L).`,
+    });
+  }
+
+  let dilutionFluidVolumeMl: number;
+  let isCustom = false;
+
+  if (customDilutionFluidVolumeMl !== undefined) {
+    dilutionFluidVolumeMl = customDilutionFluidVolumeMl;
+    isCustom = true;
+  } else {
+    // Calcular volumen mínimo seguro
+    const minTotalVolume = mEqRequired / selectedConcentrationMEqMl;
+    const calculatedDilution = Math.ceil(minTotalVolume - mlClK);
+    dilutionFluidVolumeMl = calculatedDilution < 10 ? 10 : calculatedDilution;
+  }
+
+  const totalVolumeMl = parseFloat((dilutionFluidVolumeMl + mlClK).toFixed(2));
+  const concentrationMEqMl = parseFloat((mEqRequired / totalVolumeMl).toFixed(4));
+  const concentrationMEqL = parseFloat((concentrationMEqMl * 1000).toFixed(2));
+
+  steps.push({
+    name: 'Volumen de Dilución Sugerido',
+    formula: 'Volumen Total Mínimo (ml) = mEq Requeridos / Límite de Concentración (mEq/ml)',
+    development: isCustom
+      ? `Usando volumen personalizado del usuario: ${dilutionFluidVolumeMl} ml de dilución`
+      : `mEq Requeridos: ${mEqRequired} mEq / Límite (${selectedConcentrationMEqMl} mEq/ml) - ml ClK (${mlClK} ml)`,
+    result: `${dilutionFluidVolumeMl} ml de solución compatible`,
+  });
+
+  steps.push({
+    name: 'Concentración Final de Potasio',
+    formula: 'Concentración = mEq Requeridos / Volumen Total (ml)',
+    development: `${mEqRequired} mEq / ${totalVolumeMl} ml`,
+    result: `${concentrationMEqL} mEq/L (${concentrationMEqMl} mEq/ml)`,
+  });
+
+  // Validar concentración según acceso venoso
+  if (
+    access === 'peripheral' &&
+    concentrationMEqMl > constants.maxPotassiumConcentrationPeripheralMEqMl
+  ) {
+    alerts.push({
+      type: 'danger',
+      parameter: 'concentracion_periferica',
+      message: `La concentración final (${concentrationMEqL} mEq/L) supera el límite seguro para vía periférica (${constants.maxPotassiumConcentrationPeripheralMEqMl * 1000} mEq/L). Riesgo de flebitis química.`,
+    });
+  } else if (
+    access === 'central' &&
+    concentrationMEqMl > constants.maxPotassiumConcentrationCentralMEqMl
+  ) {
+    alerts.push({
+      type: 'danger',
+      parameter: 'concentracion_central',
+      message: `La concentración final (${concentrationMEqL} mEq/L) supera el límite extremo seguro para vía central (${constants.maxPotassiumConcentrationCentralMEqMl * 1000} mEq/L). ¡Extremar precauciones!`,
+    });
+  } else if (
+    access === 'central' &&
+    concentrationMEqMl > constants.maxPotassiumConcentrationPeripheralMEqMl
+  ) {
+    alerts.push({
+      type: 'info',
+      parameter: 'concentracion_via_central',
+      message: `La concentración de ${concentrationMEqL} mEq/L es segura ya que se administra por vía central (límite vía central: ${constants.maxPotassiumConcentrationCentralMEqMl * 1000} mEq/L).`,
+    });
+  }
+
+  // Velocidad de Infusión (ml/h)
+  const infusionRateMlPerHour = parseFloat((totalVolumeMl / infusionTimeHours).toFixed(2));
+  steps.push({
+    name: 'Velocidad de Infusión',
+    formula: 'Velocidad (ml/h) = Volumen Total (ml) / Tiempo de Infusión (h)',
+    development: `${totalVolumeMl} ml / ${infusionTimeHours} h`,
+    result: `${infusionRateMlPerHour} ml/h`,
+  });
+
+  // Indicación médica estructurada
+  const accessText = access === 'peripheral' ? 'Vía Periférica' : 'Vía Central';
+  const instructionText =
+    `INDICACIÓN MÉDICA PEDIÁTRICA DE MANTENIMIENTO (${accessText}):\n` +
+    `Administrar mantenimiento de Potasio de ${mEqRequired} mEq (${dailyRequirementMEqKg} mEq/kg/día) por ${accessText}.\n` +
+    `Preparación: Agregar ${mlClK} ml de Cloruro de Potasio (ClK al 20%) a ${dilutionFluidVolumeMl} ml de Solución compatible (ej. Solución Fisiológica 0.9% o Dextrosa 5%).\n` +
+    `Volumen Total a infundir: ${totalVolumeMl} ml.\n` +
+    `Velocidad de infusión: Infundir a ${infusionRateMlPerHour} ml/h en bomba de infusión continua por un lapso de ${infusionTimeHours} horas.`;
+
+  const medicalOrder: MedicalOrder = {
+    solutionVolumeMl: dilutionFluidVolumeMl,
+    electrolyteVolumeMl: mlClK,
+    totalVolumeMl,
+    infusionRateMlPerHour,
+    durationHours: infusionTimeHours,
+    instructionText,
+  };
+
   return {
     patient,
     mEqRequired,
     mlClK,
     dailyContributionMEq: mEqRequired,
+    dilutionFluidVolumeMl,
+    totalVolumeMl,
+    infusionRateMlPerHour,
     steps,
+    alerts,
+    medicalOrder,
   };
 }

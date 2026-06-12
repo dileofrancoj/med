@@ -11,10 +11,9 @@ describe('PotassiumMapper Unit Tests', () => {
   describe('toRapidCorrectionDomain', () => {
     it('should map valid numeric values correctly', () => {
       const dto: RapidCorrectionRequestDto = {
+        useCase: 'rapid',
         patient: {
           weight: 12.5,
-          age: 5,
-          sex: 'male',
           accessType: 'peripheral',
         },
         doseMEqKg: 0.5,
@@ -26,8 +25,6 @@ describe('PotassiumMapper Unit Tests', () => {
       const domain = PotassiumMapper.toRapidCorrection(dto);
 
       expect(domain.patient.weight).toBe(12.5);
-      expect(domain.patient.age).toBe(5);
-      expect(domain.patient.sex).toBe('male');
       expect(domain.patient.venousAccess).toBe('peripheral');
       expect(domain.doseMEqKg).toBe(0.5);
       expect(domain.infusionTimeHours).toBe(2);
@@ -37,10 +34,9 @@ describe('PotassiumMapper Unit Tests', () => {
 
     it('should parse string representations of numbers to appropriate types', () => {
       const dto: RapidCorrectionRequestDto = {
+        useCase: 'rapid',
         patient: {
           weight: 10,
-          age: 6,
-          sex: 'female',
           accessType: 'peripheral',
         },
         doseMEqKg: '0.5',
@@ -52,7 +48,6 @@ describe('PotassiumMapper Unit Tests', () => {
       const domain = PotassiumMapper.toRapidCorrection(dto);
 
       expect(domain.patient.weight).toBe(10);
-      expect(domain.patient.age).toBe(6);
       expect(domain.doseMEqKg).toBe(0.5);
       expect(domain.infusionTimeHours).toBe(2);
       expect(domain.customDilutionFluidVolumeMl).toBe(80);
@@ -107,18 +102,25 @@ describe('PotassiumMapper Unit Tests', () => {
   describe('toMaintenanceDomain', () => {
     it('should map maintenance request correctly', () => {
       const dto: PotassiumMaintenanceRequestDto = {
+        useCase: 'maintenance',
         patient: {
           weight: 12,
-          age: 3,
+          accessType: 'central',
         },
         dailyRequirementMEqKg: '3.5',
+        infusionTimeHours: '24',
+        selectedConcentrationMEqL: '40',
+        customDilutionFluidVolumeMl: 500,
       };
 
       const domain = PotassiumMapper.toMaintenanceDomain(dto);
 
       expect(domain.patient.weight).toBe(12);
-      expect(domain.patient.age).toBe(3);
+      expect(domain.patient.venousAccess).toBe('central');
       expect(domain.dailyRequirementMEqKg).toBe(3.5);
+      expect(domain.infusionTimeHours).toBe(24);
+      expect(domain.selectedConcentrationMEqL).toBe(40);
+      expect(domain.customDilutionFluidVolumeMl).toBe(500);
     });
   });
 
@@ -129,7 +131,19 @@ describe('PotassiumMapper Unit Tests', () => {
         mEqRequired: 42,
         mlClK: 14,
         dailyContributionMEq: 42,
+        dilutionFluidVolumeMl: 1000,
+        totalVolumeMl: 1014,
+        infusionRateMlPerHour: 42.25,
         steps: [],
+        alerts: [{ type: 'info', parameter: 'test', message: 'Test alert' }],
+        medicalOrder: {
+          solutionVolumeMl: 1000,
+          electrolyteVolumeMl: 14,
+          totalVolumeMl: 1014,
+          infusionRateMlPerHour: 42.25,
+          durationHours: 24,
+          instructionText: 'Test medical instruction',
+        },
       };
 
       const dto = PotassiumMapper.toMaintenanceResponseDto(domainResponse);
@@ -137,6 +151,12 @@ describe('PotassiumMapper Unit Tests', () => {
       expect(dto.mEqRequired).toBe(42);
       expect(dto.mlClK).toBe(14);
       expect(dto.dailyContributionMEq).toBe(42);
+      expect(dto.dilutionFluidVolumeMl).toBe(1000);
+      expect(dto.totalVolumeMl).toBe(1014);
+      expect(dto.infusionRateMlPerHour).toBe(42.25);
+      expect(dto.instructionText).toBe('Test medical instruction');
+      expect(dto.alerts).toHaveLength(1);
+      expect(dto.alerts?.[0].message).toBe('Test alert');
     });
   });
 });

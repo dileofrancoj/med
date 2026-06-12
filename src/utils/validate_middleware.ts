@@ -10,22 +10,20 @@ export const validate = (schema: ZodObject) => {
       });
 
       req.body = parsed.body;
-      // @ts-expect-error ignore query
-      req.query = parsed.query;
 
       next();
     } catch (error) {
-    if (error instanceof ZodError) {
-      return res.status(400).json({
-        status: 'error',
-        message: 'Error de validación en la petición',
-        errors: error.issues.map((err) => ({
-          field: err.path.slice(1).join('.'),
-          message: err.message,
-        })),
-      });
-    }
-
+      if (error instanceof ZodError) {
+        return res.status(400).json({
+          status: 'error',
+          message: 'Error de validación en la petición',
+          errors: error.issues.map((err) => ({
+            field: err.path.slice(1).join('.'),
+            message: err.message,
+          })),
+        });
+      }
+      console.log('error', error);
       return res.status(500).json({ error: 'Error interno en la validación' });
     }
   };

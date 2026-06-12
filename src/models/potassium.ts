@@ -3,9 +3,10 @@ import { ValidationAlert, CalculationStep, MedicalOrder } from './common';
 
 export type HypokalemiaSeverity = 'normal' | 'leve' | 'moderada' | 'severa' | 'critica';
 export type HyperkalemiaSeverity = 'normal' | 'leve' | 'moderada' | 'severa';
+export type POTASSIUM_STATUS_CLASSIFICATION = 'normal' | 'hipokalemia' | 'hiperkalemia';
 
 export interface PotassiumClassification {
-  status: 'normal' | 'hipokalemia' | 'hiperkalemia';
+  status: POTASSIUM_STATUS_CLASSIFICATION;
   severity: HypokalemiaSeverity | HyperkalemiaSeverity;
   kLevel: number;
 }
@@ -36,6 +37,9 @@ export interface RapidPotassiumCorrectionResponse {
 export interface PotassiumMaintenanceRequest {
   patient: Patient;
   dailyRequirementMEqKg: number; // e.g., 2 to 4 mEq/kg/day
+  infusionTimeHours?: number; // usually 24
+  selectedConcentrationMEqL?: number;
+  customDilutionFluidVolumeMl?: number;
 }
 
 export interface PotassiumMaintenanceResponse {
@@ -43,5 +47,10 @@ export interface PotassiumMaintenanceResponse {
   mEqRequired: number;
   mlClK: number;
   dailyContributionMEq: number;
+  dilutionFluidVolumeMl: number;
+  totalVolumeMl: number;
+  infusionRateMlPerHour: number;
   steps: CalculationStep[];
+  alerts?: ValidationAlert[];
+  medicalOrder?: MedicalOrder;
 }

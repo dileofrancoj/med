@@ -23,8 +23,6 @@ export const PotassiumMapper = {
 
     const patient: Patient = {
       weight: rawPatient.weight,
-      age: dto.patient.age ?? undefined,
-      sex: rawPatient.sex,
       venousAccess: rawPatient.accessType,
     };
 
@@ -92,12 +90,7 @@ export const PotassiumMapper = {
 
     const patient: Patient = {
       weight: rawPatient.weight,
-      age: rawPatient.age
-        ? typeof rawPatient.age === 'string'
-          ? parseInt(rawPatient.age, 10)
-          : rawPatient.age
-        : undefined,
-      sex: rawPatient.sex,
+      venousAccess: rawPatient.accessType,
     };
 
     return {
@@ -106,6 +99,11 @@ export const PotassiumMapper = {
         typeof dto.dailyRequirementMEqKg === 'string'
           ? parseFloat(dto.dailyRequirementMEqKg)
           : dto.dailyRequirementMEqKg,
+      infusionTimeHours: potassiumHelper.parseOptionalNumber(dto.infusionTimeHours),
+      selectedConcentrationMEqL: potassiumHelper.parseOptionalNumber(dto.selectedConcentrationMEqL),
+      customDilutionFluidVolumeMl: potassiumHelper.parseOptionalNumber(
+        dto.customDilutionFluidVolumeMl,
+      ),
     };
   },
 
@@ -117,6 +115,11 @@ export const PotassiumMapper = {
       mEqRequired: domain.mEqRequired,
       mlClK: domain.mlClK,
       dailyContributionMEq: domain.dailyContributionMEq,
+      dilutionFluidVolumeMl: domain.dilutionFluidVolumeMl,
+      totalVolumeMl: domain.totalVolumeMl,
+      infusionRateMlPerHour: domain.infusionRateMlPerHour,
+      instructionText: domain.medicalOrder?.instructionText,
+      alerts: domain.alerts,
     };
   },
 };

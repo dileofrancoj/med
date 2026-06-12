@@ -29,8 +29,6 @@ export const rapidCorrectionSodiumSchema = z.object({
             error: 'Los datos del paciente con su peso (weight) son obligatorios',
           })
           .positive('El peso debe ser mayor a 0'),
-        age: z.number().int().positive().optional(),
-        sex: z.enum(['male', 'female']).optional(),
       },
       { error: 'Los datos del paciente con su peso (weight) son obligatorios' },
     ),
@@ -51,8 +49,6 @@ export const slowCorrectionSodiumSchema = z.object({
             error: 'Los datos del paciente con su peso (weight) son obligatorios',
           })
           .positive('El peso debe ser mayor a 0'),
-        age: z.number().int().positive().optional(),
-        sex: z.enum(['male', 'female']).optional(),
       },
       { error: 'Los datos del paciente con su peso (weight) son obligatorios' },
     ),
