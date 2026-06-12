@@ -1,8 +1,9 @@
 import { describe, it, expect } from 'vitest';
-import * as sodiumService from '../sodium_service';
+import { SodiumService } from '../sodium_service';
 import { Patient } from '../../models/patient';
 
 describe('Sodium Service Pure Functions Unit Tests', () => {
+  const sodiumService = new SodiumService();
   describe('Classification of Sodium Levels', () => {
     it('should classify normal levels correctly', () => {
       const res = sodiumService.classifySodium(140);

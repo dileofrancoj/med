@@ -1,5 +1,6 @@
 import { Router } from 'express';
-import * as sodiumHandler from '../handlers/sodium_handler';
+import { SodiumHandler } from '../handlers/sodium_handler';
+import { SodiumService } from '../services/sodium_service';
 import { validate } from '../utils/validate_middleware';
 import {
   classifySodiumSchema,
@@ -8,6 +9,8 @@ import {
 } from './schemas/sodium/sodium_schemas';
 
 const router = Router();
+const sodiumService = new SodiumService();
+const sodiumHandler = new SodiumHandler(sodiumService);
 
 router.get('/sodium/classify', validate(classifySodiumSchema), sodiumHandler.classifySodium);
 router.post(

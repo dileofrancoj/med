@@ -1,9 +1,11 @@
 import { describe, it, expect } from 'vitest';
-import * as potassiumService from '../potassium_service';
+import { PotassiumService } from '../potassium_service';
 import { classifyPotassium } from '../../utils/validate_potassium';
 import { Patient } from '../../models/patient';
 
 describe('Potassium Service Pure Functions Unit Tests', () => {
+  const potassiumService = new PotassiumService();
+
   describe('Classification of Potassium Levels', () => {
     it('should classify normal levels correctly', () => {
       const res = classifyPotassium(4.0);
@@ -117,7 +119,9 @@ describe('Potassium Service Pure Functions Unit Tests', () => {
       expect(res.totalVolumeMl).toBe(res.dilutionFluidVolumeMl + res.mlClK);
       expect(res.infusionRateMlPerHour).toBeCloseTo(res.totalVolumeMl / 24, 2);
       expect(res.medicalOrder).toBeDefined();
-      expect(res.medicalOrder?.instructionText).toContain('INDICACIÓN MÉDICA PEDIÁTRICA DE MANTENIMIENTO');
+      expect(res.medicalOrder?.instructionText).toContain(
+        'INDICACIÓN MÉDICA PEDIÁTRICA DE MANTENIMIENTO',
+      );
     });
 
     it('should respect custom infusionTimeHours and selectedConcentrationMEqL', async () => {
