@@ -2,10 +2,13 @@ import express from 'express';
 import { config } from './utils/config';
 import potassiumRoutes from './routes/potassium_routes';
 import sodiumRoutes from './routes/sodium_routes';
+import { corsMiddleware } from './http/cors';
 
 const app = express();
 
 app.use(express.json());
+
+app.use(corsMiddleware)
 
 // Register medical calculation routes
 app.use('/api', potassiumRoutes);
